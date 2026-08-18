@@ -18,12 +18,12 @@
  * Netlify/Cloudflare want a slightly different signature but the same shape:
  * read the body, add the key server-side, forward, return the reply.
  *
- * WHAT THIS DOES NOT DO
- * This talks to Ollama Cloud directly, so it has the dashboard snapshot the page
- * sends and nothing else - no long-term memory, no MCP tools, no specialists.
- * Those live in the Python process on your machine, which the page tries first
- * at 127.0.0.1:8765 whenever you are sitting at it. This is the away-from-home
- * path: still useful, deliberately less capable.
+ * MEMORY
+ * This function is stateless on purpose. Long-term memory lives in the page:
+ * facts JARVIS is asked to remember are saved in the browser and arrive here
+ * inside the dashboard snapshot (the MEMORY block), so every request already
+ * carries everything the model needs. The page can also export that memory as
+ * a JSON file to upload to the assistant on your PC.
  */
 
 const MODEL = process.env.JARVIS_MODEL || "gpt-oss:120b";
@@ -32,7 +32,9 @@ const PERSONA = `You are JARVIS, Savan's assistant, answering from inside his sc
 dashboard. Dry, understated, competent. Address him as "sir".
 
 The DASHBOARD block below is what he is looking at right now. It is current and
-authoritative - prefer it over anything you might assume about his schedule.
+authoritative - prefer it over anything you might assume about his schedule. If it
+contains a MEMORY section, those are facts Savan asked you to remember earlier:
+treat them as true and use them naturally, without announcing that you did.
 
 Answer in one to three sentences unless he asks for more. A short list is fine when
 it genuinely helps. Never invent a class, teacher, room, date or grade: if the
